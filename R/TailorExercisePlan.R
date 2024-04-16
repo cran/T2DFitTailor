@@ -1,5 +1,5 @@
 #' This function generates a tailored exercise plan for T2D (Type 2 Diabetes)
-#'
+#' @name VisualizeTailoredExercisePlan
 #' @title Tailor Exercise Plan for T2D Patients
 #' @param input_df A data frame containing patient data necessary for
 #' generating a tailored exercise plan. Each column in the dataframe should
@@ -8,18 +8,28 @@
 #'   \item{Age}{Patient's age in years.}
 #'   \item{Sex}{Patient's sex, where 0 might denote female and 1 denotes male.}
 #'   \item{BMI}{Body Mass Index, a measure of body fat based on height and weight.}
-#'   \item{Duration_T2D (year)}{Duration of Type 2 Diabetes Mellitus in years.
-#'   It reflects how long the patient has been living with Type 2 diabetes.}
-#'   \item{HDL (mmol/L)}{High-Density Lipoprotein cholesterol levels in mmol/L.
-#'   HDL is considered the "good" cholesterol, and higher levels are often associated
-#'   with a lower risk of heart disease.}
+#'   \item{WHtR}{Patient's ratio of waist and height.}
 #'   \item{PCS}{Patient's Physical Component Summary (PCS) score,
 #'   a metric derived from the SF-12 (Short Form Health Survey) which measures health-related quality of life.
 #'   The PCS score is calculated based on responses to questions in the SF-12 survey,
 #'   reflecting physical functioning, bodily pain, general health perceptions, and physical roles.
 #'   A higher score indicates better physical health. Users can refer to the \code{PCS_Calculation}
 #'   function within this package for detailed calculations based on SF-12 survey responses.}
-#'   \item{WHtR}{Patient's ratio of waist and height.}
+#'   \item{Duration_T2D (year)}{Duration of Type 2 Diabetes Mellitus in years.
+#'   It reflects how long the patient has been living with Type 2 diabetes.}
+#'   \item{Total cholesterol (mmol/L)}{Total cholesterol levels in mmol/L.
+#'   This measurement includes LDL, HDL, and other lipid components. Higher overall
+#'   cholesterol levels can increase the risk of cardiovascular disease, although the
+#'   balance of different types of lipids (HDL, LDL, others) also plays a critical role.}
+#'   \item{HDL (mmol/L)}{High-Density Lipoprotein cholesterol levels in mmol/L.
+#'   HDL is considered the "good" cholesterol, and higher levels are often associated
+#'   with a lower risk of heart disease.}
+#'   \item{LDL (mmol/L)}{Low-Density Lipoprotein cholesterol levels in mmol/L.
+#'   LDL is often referred to as the "bad" cholesterol because high levels can lead to
+#'   plaque buildup in arteries and increase the risk of heart disease.}
+#'   \item{VO2_Max}{Patient's maximum oxygen uptake.}
+#'   \item{Lung_capacity}{Patient's lung volume or capacity.}
+#'   \item{BACK_Scratch_Test}{Assessment of the patient's upper limb flexibility and shoulder range of motion.}
 #' }
 #' Note: It is crucial that the data for each of these columns is correctly formatted
 #' and accurately represents the patient's health information for the exercise
@@ -37,39 +47,48 @@
 #' @importFrom jsonlite fromJSON
 #'
 #' @examples
-#' # Create a demo dataframe
-#' set.seed(16)
+#' #Create a demo dataframe
+#' set.seed(5)
 #' df <- data.frame(
-#' Age = sample(39:77, 8, replace = TRUE),
-#' Sex = sample(0:1, 8, replace = TRUE),
-#' BMI = sample(18:31, 8, replace = TRUE),
-#' Duration_T2D = sample(1:26, 8, replace = TRUE),
-#' HDL = sample(1:1.7, 8, replace = TRUE),
-#' PCS = sample(27:54, 8, replace = TRUE),
-#' WHtR = sample(0.4:0.6, 8, replace = TRUE)
-#')
-#' rownames(df) <- c("xiaoming", "xiaohong", "xiaohua", "xiaogang",
-#'                   "xiaoli", "zhangsan", "lisi", "wangwu")
-#' colnames(df) <- c("Age", "Sex", "BMI", "Duration_T2D (year)",
-#'                   "HDL (mmol/L)", "PCS", "WHtR")
+#'   Age = sample(39:77, 8, replace = TRUE),
+#'   Sex = sample(0:1, 8, replace = TRUE),
+#'   BMI = sample(18:31, 8, replace = TRUE),
+#'   WHtR = sample(0.4:0.6, 8, replace = TRUE),
+#'   PCS = sample(27:54, 8, replace = TRUE),
+#'   Duration_T2D = sample(1:26, 8, replace = TRUE),
+#'   Total_cholesterol = sample(7.4:14.1, 8, replace = TRUE),
+#'   HDL = sample(1:1.7, 8, replace = TRUE),
+#'   LDL = sample(2.2:4.7, 8, replace = TRUE),
+#'   VO2_Max = sample(13:45, 8, replace = TRUE),
+#'   Lung_capacity = sample(1900:4600, 8, replace = TRUE),
+#'   Back_Scratch_Test = sample(-30:8, 8, replace = TRUE))
+#'
+#' names(df) <- c('Age', 'Sex', 'BMI', 'WHtR', 'PCS', 'Duration_T2D (year)',
+#'                'Total cholesterol (mmol/L)', 'HDL (mmol/L)', 'LDL (mmol/L)',
+#'                'VO2_Max (ml/kg/min)', 'Lung_capacity (ml)', 'Back_Scratch_Test (cm)')
+#' rownames(df) <- c('Sample1', 'Sample2', 'Sample3', 'Sample4',
+#'                   'Sample5', 'Sample6', 'Sample7', 'Sample8')
+#'
 #' # Run the TailorExercisePlan function
 #' demo_result <- TailorExercisePlan(df)
 #' # View the structure of the returned list
 #' str(demo_result)
 #'
+library(httr)
+library(jsonlite)
 TailorExercisePlan <- function(input_df) {
 
   # define the required columns
-  required_columns <- c('Age', 'Sex', 'BMI', 'Duration_T2D (year)', 'HDL (mmol/L)', 'PCS', 'WHtR')
+  required_columns <- c('Age', 'Sex', 'BMI', 'WHtR', 'PCS', 'Duration_T2D (year)','Total cholesterol (mmol/L)', 'HDL (mmol/L)', 'LDL (mmol/L)', 'VO2_Max (ml/kg/min)', 'Lung_capacity (ml)', 'Back_Scratch_Test (cm)')
 
   # check the required columns
   if (!all(required_columns %in% names(input_df))) {
-    return("The input DataFrame does not contain all the required columns. Please ensure it includes: 'Age', 'Sex', 'BMI', 'Duration_T2D (year)', 'HDL (mmol/L)', 'PCS', 'WHtR'.")
+    return("The input DataFrame does not contain all the required columns. Please ensure it includes: 'Age', 'Sex', 'BMI', 'WHtR', 'PCS', 'Duration_T2D (year)','Total cholesterol (mmol/L)', 'HDL (mmol/L)', 'LDL (mmol/L)', 'VO2_Max (ml/kg/min)', 'Lung_capacity (ml)', 'Back_Scratch_Test (cm)'")
   }
 
   if (length(names(input_df)) != length(required_columns)) {
     extra_cols <- setdiff(names(input_df), required_columns)
-    return(paste("The input DataFrame contains additional columns:", paste(extra_cols, collapse=', '), ". Please ensure it only includes the required columns: 'Age', 'Sex', 'BMI', 'Duration_T2D (year)', 'HDL (mmol/L)', 'PCS', 'WHtR'."))
+    return(paste("The input DataFrame contains additional columns:", paste(extra_cols, collapse=', '), ". Please ensure it only includes the required columns: 'Age', 'Sex', 'BMI', 'WHtR', 'PCS', 'Duration_T2D (year)','Total cholesterol (mmol/L)', 'HDL (mmol/L)', 'LDL (mmol/L)', 'VO2_Max (ml/kg/min)', 'Lung_capacity (ml)', 'Back_Scratch_Test (cm)'"))
   }
 
   # check the number of row

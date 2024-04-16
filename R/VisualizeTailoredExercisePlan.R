@@ -1,5 +1,5 @@
 #' This function visualizes the exercise plan recommendations for Type 2 Diabetes (T2D) patients by generating radar charts.
-#'
+#' @name TailorExercisePlan
 #' @title Visualize Tailored Exercise Plan for T2D Patients
 #'
 #' @param demo_result A list containing two data frames (`$RecommendedExercisePlan` and `$AllExercisePlan`) as returned by the `TailorExercisePlan` function.
@@ -44,46 +44,43 @@
 #' @importFrom fmsb radarchart
 #'
 #' @examples
-#
-#' # Create a demo dataframe
-#' #' set.seed(16)
+#'
+#' #Create a demo dataframe
+#' set.seed(5)
 #' df <- data.frame(
-#' Age = sample(39:77, 8, replace = TRUE),
-#' Sex = sample(0:1, 8, replace = TRUE),
-#' BMI = sample(18:31, 8, replace = TRUE),
-#' Duration_T2D = sample(1:26, 8, replace = TRUE),
-#' HDL = sample(1:1.7, 8, replace = TRUE),
-#' PCS = sample(27:54, 8, replace = TRUE),
-#' WHtR = sample(0.4:0.6, 8, replace = TRUE)
-#')
-#' rownames(df) <- c("xiaoming", "xiaohong", "xiaohua", "xiaogang",
-#'                   "xiaoli", "zhangsan", "lisi", "wangwu")
-#' colnames(df) <- c("Age", "Sex", "BMI", "Duration_T2D (year)",
-#'                   "HDL (mmol/L)", "PCS", "WHtR")
+#'   Age = sample(39:77, 8, replace = TRUE),
+#'   Sex = sample(0:1, 8, replace = TRUE),
+#'   BMI = sample(18:31, 8, replace = TRUE),
+#'   WHtR = sample(0.4:0.6, 8, replace = TRUE),
+#'   PCS = sample(27:54, 8, replace = TRUE),
+#'   Duration_T2D = sample(1:26, 8, replace = TRUE),
+#'   Total_cholesterol = sample(7.4:14.1, 8, replace = TRUE),
+#'   HDL = sample(1:1.7, 8, replace = TRUE),
+#'   LDL = sample(2.2:4.7, 8, replace = TRUE),
+#'   VO2_Max = sample(13:45, 8, replace = TRUE),
+#'   Lung_capacity = sample(1900:4600, 8, replace = TRUE),
+#'   Back_Scratch_Test = sample(-30:8, 8, replace = TRUE))
+#'
+#' names(df) <- c('Age', 'Sex', 'BMI', 'WHtR', 'PCS', 'Duration_T2D (year)',
+#'               'Total cholesterol (mmol/L)', 'HDL (mmol/L)', 'LDL (mmol/L)',
+#'               'VO2_Max (ml/kg/min)', 'Lung_capacity (ml)', 'Back_Scratch_Test (cm)')
+#' rownames(df) <- c('Sample1', 'Sample2', 'Sample3', 'Sample4',
+#'                   'Sample5', 'Sample6', 'Sample7', 'Sample8')
+#'
 #' # Run the TailorExercisePlan function
 #' demo_result <- TailorExercisePlan(df)
 #'
-#' # visualize the outcome from 'TailorExercisePlan' function
-#' VisualizeTailoredExercisePlan(demo_result, sample_selection="all",
-#'                               sort_by="head", exercise_type="all",
-#'                               nrow="auto", ncol="auto", show_legend=TRUE)
+#' # Visualize the outcome from 'TailorExercisePlan' function
+#' VisualizeTailoredExercisePlan(demo_result,sample_selection="all",sort_by="head",
+#'                               exercise_type="best",nrow="auto",ncol="auto",show_legend=TRUE)
 #'
-#' VisualizeTailoredExercisePlan(demo_result, sample_selection="zhangsan",
-#'                               sort_by="head", exercise_type="all",
-#'                               nrow="auto", ncol="auto", show_legend=TRUE)
+#' VisualizeTailoredExercisePlan(demo_result,sample_selection="Sample1",sort_by="head",
+#'                               exercise_type="all",nrow="auto",ncol="auto",show_legend=TRUE)
 #'
-#' VisualizeTailoredExercisePlan(demo_result, sample_selection=c("zhangsan","lisi"),
-#'                               sort_by="head", exercise_type="all",
-#'                               nrow="auto", ncol="auto", show_legend=TRUE)
-#'
-#' VisualizeTailoredExercisePlan(demo_result, sample_selection=1,
-#'                               sort_by="head", exercise_type="all",
-#'                               nrow="auto", ncol="auto", show_legend=TRUE)
-#'
-#' VisualizeTailoredExercisePlan(demo_result, sample_selection="all",
-#'                               sort_by="head", exercise_type="best",
-#'                               nrow="auto", ncol="auto", show_legend=TRUE)
-#'
+library(grDevices)
+library(graphics)
+library(dplyr)
+library(fmsb)
 VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
                                           sort_by="head", exercise_type="all",
                                           nrow="auto", ncol="auto", show_legend=TRUE) {
@@ -102,7 +99,7 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
 
   # give the recommended exercise plan to a new object for visualization
   recommended_exercises <- demo_result$RecommendedExercisePlan
-
+  recommended_exercises$Sample_ID <- factor(recommended_exercises$Sample_ID,levels = unique(recommended_exercises$Sample_ID))
   # sample_selection
   if(length(sample_selection) == 1){
     if (sample_selection != "all") {
@@ -247,13 +244,13 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
   par(mfrow = c(nrows, ncols))
   par(mar=c(4, 3, 3, 5))
 
-  colors <- c("#0571b0", "#fdae61", "#91cf60", "#ca0020", "#7b3294", "#92c5de")
+  colors <- c("#E64B35FF","#0571b0", "#fdae61", "#91cf60", "#ca0020", "#7b3294", "#92c5de" ,"#4DBBD5FF")
 
-  names(colors) <- c("Taiji","Qigong","Stretching","Rugby","Cycling","Walking")
+  names(colors) <- c("A&R","Taiji","Qigong","Stretching","Rugby","Cycling","Int-Walking","Con-Walking")
 
   df_all <- recommended_exercises
 
-  #set the content as numeric value:"Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Intervention duration (w)", "length (min)", "Frequency (per week)"
+  #set the content as numeric value:"Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Duration (w)", "Session (min)", "Frequency (per week)"
   for (k in 3:7) {
     df_all[[k]] <- as.numeric(df_all[[k]])
   }
@@ -266,19 +263,19 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
 
       df_result <- subset(df_all,df_all$Sample_ID==current_sample)
 
-      #df_result <- mutate(df, across(c(`Decreased_HbA1c (%)`, Recommendation_score, `Intervention duration (w)`, `length (min)`, `Frequency (per week)`), as.numeric))
+      #df_result <- mutate(df, across(c(`Decreased_HbA1c (%)`, Recommendation_score, `Duration (w)`, `Session (min)`, `Frequency (per week)`), as.numeric))
 
-      df_result <- df_result[c("Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Intervention duration (w)", "length (min)", "Frequency (per week)")]
+      df_result <- df_result[c("Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Duration (w)", "Session (min)", "Frequency (per week)")]
 
       rownames(df_result) <- df_result$Exercise_type
 
       df_result <- df_result[-1]
 
       # set the scope for each parameter
-      radar_limits <- data.frame(rbind(c(4.7, 1, 12, 60, 7),#maximun
+      radar_limits <- data.frame(rbind(c(4.7, 1, 12, 80, 7),#maximun
                                        c(0, 0, 0, 0, 0)  #minimun
       ))
-      colnames(radar_limits) <- c("Decreased_HbA1c (%)", "Recommendation_score", "Intervention duration (w)", "length (min)", "Frequency (per week)")
+      colnames(radar_limits) <- c("Decreased_HbA1c (%)", "Recommendation_score", "Duration (w)", "Session (min)", "Frequency (per week)")
 
 
       df_result <- rbind(radar_limits,df_result)
@@ -307,13 +304,13 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
       text(x=0.6*cos(90/180*pi), y=0.6*sin(90/180*pi), labels = 2.35)
       text(x=0.6*cos(162/180*pi), y=0.6*sin(162/180*pi), labels = 0.5)
       text(x=0.6*cos(234/180*pi), y=0.6*sin(234/180*pi), labels = 6)
-      text(x=0.6*cos(306/180*pi), y=0.6*sin(306/180*pi), labels = 30)
+      text(x=0.6*cos(306/180*pi), y=0.6*sin(306/180*pi), labels = 40)
 
       text(x=1*cos(18/180*pi), y=1*sin(18/180*pi), labels = 7, pos = 4)
       text(x=1*cos(90/180*pi), y=1*sin(90/180*pi), labels = 4.7, pos = 3)
       text(x=1*cos(162/180*pi), y=1*sin(162/180*pi), labels = 1, pos = 2)
       text(x=1*cos(234/180*pi), y=1*sin(234/180*pi), labels = 12, pos = 2)
-      text(x=1*cos(306/180*pi), y=1*sin(306/180*pi), labels = 60, pos = 4)
+      text(x=1*cos(306/180*pi), y=1*sin(306/180*pi), labels = 80, pos = 4)
 
 
       if(show_legend == TRUE){
@@ -329,21 +326,21 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
 
       df_result <- subset(df_all,df_all$Sample_ID==current_sample)
 
-      #df_result <- mutate(df, across(c(`Decreased_HbA1c (%)`, Recommendation_score, `Intervention duration (w)`, `length (min)`, `Frequency (per week)`), as.numeric))
+      #df_result <- mutate(df, across(c(`Decreased_HbA1c (%)`, Recommendation_score, `Duration (w)`, `Session (min)`, `Frequency (per week)`), as.numeric))
 
-      df_result <- df_result[c("Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Intervention duration (w)", "length (min)", "Frequency (per week)")]
+      df_result <- df_result[c("Exercise_type","Decreased_HbA1c (%)", "Recommendation_score", "Duration (w)", "Session (min)", "Frequency (per week)")]
 
       rownames(df_result) <- df_result$Exercise_type
 
       df_result <- df_result[-1]
 
-      colnames(df_result) <- c("Dec","Rec","Dur","Len","Fre")
+      colnames(df_result) <- c("Dec","Rec","Dur","Ses","Fre")
 
       # set the slope for the radar chart
-      radar_limits <- data.frame(rbind(c(4.7, 1, 12, 60, 7),#maximum
+      radar_limits <- data.frame(rbind(c(4.7, 1, 12, 80, 7),#maximum
                                        c(0, 0, 0, 0, 0)#minimum
       ))
-      colnames(radar_limits) <- c("Dec","Rec","Dur","Len","Fre")
+      colnames(radar_limits) <- c("Dec","Rec","Dur","Ses","Fre")
 
 
       df_result <- rbind(radar_limits,df_result)
@@ -372,7 +369,7 @@ VisualizeTailoredExercisePlan <- function(demo_result, sample_selection="all",
       text(x=0.6*cos(90/180*pi), y=0.6*sin(90/180*pi), labels = 2.35)
       text(x=0.6*cos(162/180*pi), y=0.6*sin(162/180*pi), labels = 0.5)
       text(x=0.6*cos(234/180*pi), y=0.6*sin(234/180*pi), labels = 6)
-      text(x=0.6*cos(306/180*pi), y=0.6*sin(306/180*pi), labels = 30)
+      text(x=0.6*cos(306/180*pi), y=0.6*sin(306/180*pi), labels = 40)
 
     }
     # get a new place for the legend visualization

@@ -1,7 +1,7 @@
 Package: T2DFitTailor
-Title: 'Tailor the Exercise Plans and Visualize the Outcome for T2D
-        Patients'
-Version: 1.0.0
+Title: Tailor the Exercise Plans and Visualize the Outcome for T2D
+        Patients
+Version: 3.0.0
 Authors@R: c(person("Cheng", "Liu", email = "971264017@qq.com", role = c("aut", "cre")),
             person("Xinyu","Hou",role="aut"),
             person("Bingxiang","Xu",role="aut"),
@@ -13,7 +13,7 @@ Encoding: UTF-8
 Imports: dplyr,fmsb,graphics,grDevices,httr,jsonlite
 RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2024-03-01 02:44:49 UTC; supercheng
+Packaged: 2024-04-15 08:26:28 UTC; supercheng
 Author: Cheng Liu [aut, cre],
   Xinyu Hou [aut],
   Bingxiang Xu [aut],
@@ -21,4 +21,4 @@ Author: Cheng Liu [aut, cre],
   Ru Wang [aut]
 Maintainer: Cheng Liu <971264017@qq.com>
 Repository: CRAN
-Date/Publication: 2024-03-04 10:30:06 UTC
+Date/Publication: 2024-04-16 14:30:02 UTC

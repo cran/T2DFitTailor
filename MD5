@@ -1,9 +1,9 @@
-cd6c0957c2141c3cbd8282da823311b0 *DESCRIPTION
+8374d21077159d68d80a628a9b023259 *DESCRIPTION
 fdfd882c68fc1b85e0f886adf575b52c *LICENSE
 eae644aa027e356a26bf10be4db90094 *NAMESPACE
 27078dd7afd5168fbac87f09560b9152 *R/PCS_Calculation.R
-606074f95300782c6674d6704e2d127b *R/TailorExercisePlan.R
-1c82d5846f525a78246328a55fd388f0 *R/VisualizeTailoredExercisePlan.R
+342b39d451cf3043fbc09abb0ebb8309 *R/TailorExercisePlan.R
+e65c53210c21f02d9b22284eb4486faf *R/VisualizeTailoredExercisePlan.R
 8e38e4dd0b80bc6825968b3b177b83a1 *man/PCS_Calculation.Rd
-ad4599368f8b6e5d9dda5ec76171b817 *man/TailorExercisePlan.Rd
-86da772f93fdbe8e6204f4c449d94f09 *man/VisualizeTailoredExercisePlan.Rd
+2aebc5e67c2c05c3d0863692b403d857 *man/TailorExercisePlan.Rd
+d7234a68f5b3c3432c7626d64b2071c6 *man/VisualizeTailoredExercisePlan.Rd
